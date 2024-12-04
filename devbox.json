@@ -17,7 +17,9 @@
       "git config core.hooksPath .githooks"
     ],
     "scripts": {
-      "build": ["task build"]
+      "build": ["task build"],
+      "test": ["task test"],
+      "test/coverage": ["task test/coverage"]
     }
   }
 }
