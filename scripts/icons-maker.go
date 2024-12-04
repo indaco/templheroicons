@@ -22,7 +22,7 @@ const (
 	Size24 heroicons.Size = "24"
 
 	cacheDuration = 30 * 24 * time.Hour
-	datasetURL    = "https://raw.githubusercontent.com/iconify/icon-sets/refs/heads/master/json/heroicons_cache.json"
+	datasetURL    = "https://raw.githubusercontent.com/iconify/icon-sets/refs/heads/master/json/heroicons.json"
 	maxRetries    = 3
 	retryDelay    = 5 * time.Second
 	cacheFile     = "heroicons_cache.json"
