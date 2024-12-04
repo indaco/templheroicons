@@ -60,7 +60,7 @@ func (i *Icon) String() string {
 	return builder.String()
 }
 
-func (i *Icon) Render2() templ.Component {
+func (i *Icon) Render() templ.Component {
 	return templ.Raw(i.String())
 }
 
