@@ -1,0 +1,26 @@
+# Logs
+logs
+*.log
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+temp
+.temp
+
+*_templ.go.grc.bk
+
+# devbox
+.devbox
+
+# tests
+coverage.out
+profile.cov

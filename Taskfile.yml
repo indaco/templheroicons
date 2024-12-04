@@ -1,0 +1,22 @@
+version: '3'
+
+tasks:
+  test:
+    desc: Run go tests.
+    silent: true
+    cmds:
+      - go test -race -covermode=atomic .
+
+  test/coverage:
+    desc: Run go tests and use go tool cover.
+    silent: true
+    cmds:
+      - go test -coverprofile=coverage.out .
+      - go tool cover -html=coverage.out
+
+  build:
+    desc: Generate the Go icon definitions based on parsed data/heroicons_cache.json file.
+    silent: true
+    dir: './scripts/'
+    cmds:
+      - go run icons-maker.go

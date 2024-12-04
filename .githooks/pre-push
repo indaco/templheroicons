@@ -1,0 +1,17 @@
+#!/bin/sh
+
+echo ""
+echo '* Verify dependencies'
+go mod verify
+
+echo ""
+echo '* Install: golangci-lint'
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+echo ""
+echo '* Run: golangci'
+golangci-lint run ./...
+
+echo ""
+echo '* Run: go test'
+go test -race -covermode=atomic .

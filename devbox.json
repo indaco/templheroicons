@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.13.0/.schema/devbox.schema.json",
+  "packages": [
+    "git@latest",
+    "go@1.22",
+    "go-task@latest",
+    "gnumake@latest",
+    "templ@latest"
+  ],
+  "env": {
+    "DEVBOX_COREPACK_ENABLED": "true"
+  },
+  "shell": {
+    "init_hook": [
+      "echo 'Welcome to the templ-heroicons devbox!'",
+      "find .githooks -type f -exec chmod +x {} \\;",
+      "git config core.hooksPath .githooks"
+    ],
+    "scripts": {
+      "generate": ["task generate/icons"]
+    }
+  }
+}
