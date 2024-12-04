@@ -12,12 +12,12 @@
   },
   "shell": {
     "init_hook": [
-      "echo 'Welcome to the templ-heroicons devbox!'",
+      "echo 'Welcome to the templheroicons devbox!'",
       "find .githooks -type f -exec chmod +x {} \\;",
       "git config core.hooksPath .githooks"
     ],
     "scripts": {
-      "generate": ["task generate/icons"]
+      "build": ["task build"]
     }
   }
 }
