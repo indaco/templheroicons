@@ -108,7 +108,7 @@ func fetchAndCacheDataset(url string, cachePath string, maxAge time.Duration) ([
 }
 
 // Parses icons from the JSON dataset.
-func parseIcons(jsonData []byte) (map[string]heroicons.Icon, error) {
+func parseIcons(jsonData []byte) (map[string]*heroicons.Icon, error) {
 	var jsonDataStruct struct {
 		Icons map[string]struct {
 			Body string `json:"body"`
@@ -119,12 +119,11 @@ func parseIcons(jsonData []byte) (map[string]heroicons.Icon, error) {
 		return nil, err
 	}
 
-	icons := make(map[string]heroicons.Icon)
-	for name, iconData := range jsonDataStruct.Icons {
-		icon := heroicons.Icon{
+	icons := make(map[string]*heroicons.Icon)
+	for name := range jsonDataStruct.Icons {
+		icon := &heroicons.Icon{
 			Name: name,
-			Body: iconData.Body,
-			Size: Size24,
+			Size: Size24, // Default size
 			Type: "Outline",
 		}
 
@@ -152,7 +151,7 @@ func cleanIconName(name string) string {
 }
 
 // Generates the Go struct name for an icon.
-func generateStructName(icon heroicons.Icon) string {
+func generateStructName(icon *heroicons.Icon) string {
 	baseName := toPascalCase(cleanIconName(icon.Name))
 	switch icon.Type {
 	case "Micro":
@@ -167,7 +166,7 @@ func generateStructName(icon heroicons.Icon) string {
 }
 
 // Generates a Go file with icon definitions.
-func generateGoFile(outputFilePath string, icons map[string]heroicons.Icon) error {
+func generateGoFile(outputFilePath string, icons map[string]*heroicons.Icon) error {
 	outFile, err := os.Create(outputFilePath)
 	if err != nil {
 		return err
@@ -179,8 +178,8 @@ func generateGoFile(outputFilePath string, icons map[string]heroicons.Icon) erro
 	builder.WriteString("package templheroicons\n\nvar (\n")
 	var structs []string
 	for _, icon := range icons {
-		structs = append(structs, fmt.Sprintf("\t%s = &Icon{Name: \"%s\", Type: \"%s\", Size: \"%s\", Body: `%s`}\n",
-			generateStructName(icon), icon.Name, icon.Type, icon.Size.String(), icon.Body))
+		structs = append(structs, fmt.Sprintf("\t%s = &Icon{Name: \"%s\", Type: \"%s\", Size: \"%s\"}\n",
+			generateStructName(icon), icon.Name, icon.Type, icon.Size.String()))
 	}
 	sort.Strings(structs)
 	for _, structDef := range structs {

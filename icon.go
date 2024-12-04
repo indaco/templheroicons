@@ -1,11 +1,15 @@
 package templheroicons
 
 import (
+	_ "embed"
+	"encoding/json"
 	"fmt"
 	"html"
+	"io"
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/a-h/templ"
 )
@@ -21,13 +25,14 @@ func (s Size) String() string {
 // Icon represents a single icon with its attributes.
 type Icon struct {
 	Name        string `json:"name"`
-	Type        string `json:"type"` // Type is either "Outline", "Solid", "Mini", or "Micro"
+	Type        string `json:"type"`
 	Size        Size   `json:"size"`
-	Body        string `json:"body"`
-	Stroke      string
-	StrokeWidth string
-	Fill        string
+	Stroke      string `json:"stroke,omitempty"`
+	StrokeWidth string `json:"strokeWidth,omitempty"`
+	Fill        string `json:"fill,omitempty"`
 	Attrs       templ.Attributes
+	body        string // Cached Body
+	mu          sync.Mutex
 }
 
 // SetSize sets the icon size in pixels.
@@ -82,10 +87,23 @@ func (i *Icon) ensureDefaults() {
 
 // String returns the SVG data of the Icon, including updated size and attributes.
 func (i *Icon) String() string {
-	var builder strings.Builder
-
 	// Ensure defaults are set.
 	i.ensureDefaults()
+
+	if i.body == "" {
+		i.mu.Lock()
+		defer i.mu.Unlock()
+
+		if i.body == "" { // Double-check after locking
+			body, err := getIconBody(i.Name)
+			if err != nil {
+				return fmt.Sprintf("<!-- Error: %s -->", err)
+			}
+			i.body = body
+		}
+	}
+
+	var builder strings.Builder
 
 	// Start the <svg> tag.
 	if i.Type == "Outline" || i.Type == "Solid" || i.Type == "Mini" || i.Type == "Micro" {
@@ -100,6 +118,8 @@ func (i *Icon) String() string {
 		fmt.Fprintf(&builder, ` fill="none" stroke-width="%s" stroke="%s"`, i.StrokeWidth, i.Stroke)
 	case "Solid", "Mini", "Micro":
 		fmt.Fprintf(&builder, ` fill="%s"`, i.Fill)
+	default:
+		fmt.Fprintf(&builder, ` fill="%s" stroke-width="%s" stroke="%s"`, i.Fill, i.StrokeWidth, i.Stroke)
 	}
 
 	// Add user-defined attributes in deterministic order.
@@ -109,7 +129,7 @@ func (i *Icon) String() string {
 	builder.WriteString(">")
 
 	// Append the SVG body and close the tag.
-	builder.WriteString(i.Body)
+	builder.WriteString(i.body)
 	builder.WriteString(`</svg>`)
 
 	return builder.String()
@@ -117,6 +137,48 @@ func (i *Icon) String() string {
 
 func (i *Icon) Render() templ.Component {
 	return templ.Raw(i.String())
+}
+
+// getIconBody retrieves the body of an icon by its name.
+func getIconBody(name string) (string, error) {
+	var loadError error
+
+	// Load and parse the JSON only once
+	iconDataOnce.Do(func() {
+		iconData = make(map[string]string)
+
+		var parsedData struct {
+			Icons map[string]struct {
+				Body string `json:"body"`
+			} `json:"icons"`
+		}
+
+		jsonFilename := "data/heroicons_cache.json"
+		heroiconsData, _ := heroiconsJSONSource.Open(jsonFilename)
+		defer heroiconsData.Close()
+
+		data, _ := io.ReadAll(heroiconsData)
+
+		if err := json.Unmarshal(data, &parsedData); err != nil {
+			loadError = fmt.Errorf("failed to parse heroicons JSON: %w", err)
+			return
+		}
+
+		for iconName, icon := range parsedData.Icons {
+			iconData[iconName] = icon.Body
+		}
+	})
+
+	if loadError != nil {
+		return "", loadError
+	}
+
+	// Lookup the icon body
+	body, exists := iconData[name]
+	if !exists {
+		return "", fmt.Errorf("icon '%s' not found", name)
+	}
+	return body, nil
 }
 
 // Reserved attributes for SVG tags that should not be overwritten.

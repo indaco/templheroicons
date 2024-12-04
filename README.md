@@ -29,9 +29,9 @@
     </a>
 </p>
 
-This package provides [heroicons](https://heroicons.com) (v2.2.0) as reusable, type-safe go [templ](https://github.com/a-h/templ) components.
+This package provides the [heroicons](https://heroicons.com) set (_v2.2.0_) as reusable, type-safe go [templ](https://github.com/a-h/templ) components.
 
-The icons dataset is dynamically fetched from the [Iconify repository](https://github.com/iconify/icon-sets), ensuring the latest version is used while supporting local caching for efficiency.
+The icons dataset is dynamically fetched from the [Iconify repository](https://github.com/iconify/icon-sets), ensuring the latest version is used while supporting local caching for efficiency. Icons are loaded lazily at runtime, reducing the memory footprint and ensuring optimal performance by only loading the necessary SVG data when requested.
 
 ## Installation
 
@@ -69,6 +69,8 @@ Icons are named in _PascalCase_ for consistency and ease of use. Size and style 
 
 ## Usage
 
+### Rendering Icons
+
 To use the icons in your templ project, call the `Render()` method on the desired icon component:
 
 ```templ
@@ -83,6 +85,10 @@ templ DemoPage() {
 }
 ```
 
+### Customizing Icons
+
+#### 1. SetAttrs()
+
 You can also use the `SetAttrs()` method to add custom attributes to your icons, such as _aria-hidden_, _focusable_, or custom CSS classes:
 
 ```templ
@@ -96,6 +102,51 @@ templ CustomIconPage() {
         "aria-hidden": "true",
         "class":       "custom-icon",
     }).Render()
+}
+```
+
+#### 2. SetSize()
+
+Use the `SetSize()` method to set a custom size for your icon in pixels:
+
+```templ
+package pages
+
+import heroicons "github.com/indaco/templheroicons"
+
+templ CustomSizePage() {
+    // Set custom size
+    @heroicons.Moon.SetSize(32).Render()
+}
+```
+
+#### 3. SetStroke() and SetStrokeWidth()
+
+Use the `SetStroke()` and `SetStrokeWidth()` methods to modify the stroke color and width for **outline** icons:
+
+```templ
+package pages
+
+import heroicons "github.com/indaco/templheroicons"
+
+templ CustomStrokePage() {
+    // Customize stroke color and width
+    @heroicons.Moon.SetStroke("#FF0000").SetStrokeWidth("2").Render()
+}
+```
+
+#### 4. SetFill()
+
+Use the `SetFill()` method to modify the fill color for **solid**, **mini** and **micro** icons:
+
+```templ
+package pages
+
+import heroicons "github.com/indaco/templheroicons"
+
+templ CustomFillPage() {
+    // Customize fill color
+    @heroicons.Moon.SetFill("#0000FF").Render()
 }
 ```
 
