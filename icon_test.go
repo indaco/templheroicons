@@ -79,7 +79,6 @@ func TestIcon_String(t *testing.T) {
 			result := strings.TrimSpace(tt.icon.String())
 			expected := strings.TrimSpace(tt.expected)
 
-			t.Logf("Generated SVG: %s", result)
 			if result != expected {
 				t.Errorf("String() = %q, want %q", result, expected)
 			}
@@ -159,6 +158,31 @@ func TestAddAttributesToSVG(t *testing.T) {
 			},
 			expected: ` aria-hidden="true" focusable="false"`,
 		},
+		{
+			name: "Non-string values are skipped",
+			attrs: templ.Attributes{
+				"aria-hidden": "true",
+				"data-count":  123, // Non-string value
+				"data-bool":   true,
+			},
+			expected: ` aria-hidden="true"`,
+		},
+		{
+			name: "Safe onclick event is allowed",
+			attrs: templ.Attributes{
+				"aria-hidden": "true",
+				"onclick":     "handleClick()", // Safe event handler
+			},
+			expected: ` aria-hidden="true" onclick="handleClick()"`,
+		},
+		{
+			name: "Unsafe onclick event is skipped",
+			attrs: templ.Attributes{
+				"aria-hidden": "true",
+				"onclick":     "javascript:alert('XSS')", // Unsafe value
+			},
+			expected: ` aria-hidden="true"`, // Unsafe "onclick" is excluded
+		},
 	}
 
 	for _, tt := range tests {
@@ -170,7 +194,6 @@ func TestAddAttributesToSVG(t *testing.T) {
 			addAttributesToSVG(&builder, tt.attrs)
 
 			result := builder.String()
-			t.Logf("Generated attributes: %s", result)
 			if result != tt.expected {
 				t.Errorf("addAttributesToSVG() = %q, want %q", result, tt.expected)
 			}

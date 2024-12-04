@@ -2,6 +2,7 @@ package templheroicons
 
 import (
 	"fmt"
+	"html"
 	"sort"
 	"strings"
 
@@ -75,8 +76,33 @@ var reservedSVGAttributes = map[string]struct{}{
 	"fill":         {},
 }
 
+// sanitizeAttribute ensures that attribute keys and values are safe for inclusion in the SVG tag.
+func sanitizeAttribute(key, value string) (string, string, bool) {
+	// Define allowlist for event attributes
+	allowedEventAttributes := map[string]struct{}{
+		"onclick":  {},
+		"onchange": {},
+		"onhover":  {},
+	}
+
+	// Check for unsafe attributes
+	if _, isEvent := allowedEventAttributes[key]; isEvent {
+		// For event attributes, only allow simple JS functions (no <script> tags, eval, etc.)
+		if strings.Contains(strings.ToLower(value), "<script>") || strings.Contains(strings.ToLower(value), "javascript:") {
+			return "", "", false // Unsafe value
+		}
+	}
+
+	// Escape any unsafe characters for all attributes
+	escapedKey := html.EscapeString(key)
+	escapedValue := html.EscapeString(value)
+
+	return escapedKey, escapedValue, true // Safe attribute
+}
+
 // addAttributesToSVG adds templ.Attributes to the SVG tag, placing them at the end of the <svg> opening tag.
 // Reserved attributes are skipped to avoid overwriting critical SVG settings.
+// Attributes are sanitized to prevent XSS or injection attacks.
 func addAttributesToSVG(builder *strings.Builder, attrs templ.Attributes) {
 	if len(attrs) == 0 {
 		return
@@ -91,13 +117,25 @@ func addAttributesToSVG(builder *strings.Builder, attrs templ.Attributes) {
 
 	// Process attributes in sorted order
 	for _, key := range keys {
-		value := attrs[key]
+		value, ok := attrs[key].(string) // Ensure value is a string
+		if !ok {
+			// Skip attributes with non-string values
+			continue
+		}
+
 		// Skip reserved attributes
 		if _, isReserved := reservedSVGAttributes[key]; isReserved {
 			continue
 		}
 
-		// Add the attribute to the SVG tag
-		fmt.Fprintf(builder, ` %s="%v"`, key, value)
+		// Sanitize the attribute
+		sanitizedKey, sanitizedValue, ok := sanitizeAttribute(key, value)
+		if !ok {
+			// Skip attributes that are not safe
+			continue
+		}
+
+		// Add the sanitized attribute to the SVG tag
+		fmt.Fprintf(builder, ` %s="%v"`, sanitizedKey, sanitizedValue)
 	}
 }
