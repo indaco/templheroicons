@@ -21,7 +21,7 @@ func TestIcon_String(t *testing.T) {
 				Size: "24",
 				Type: "Outline",
 			},
-			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path d="M4.26 10.147a60 60 0 0 0-.491 6.347A48.6 48.6 0 0 1 12 20.904a48.6 48.6 0 0 1 8.232-4.41a61 61 0 0 0-.491-6.347z"/></svg>`,
+			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor"><path d="M4.26 10.147a60 60 0 0 0-.491 6.347A48.6 48.6 0 0 1 12 20.904a48.6 48.6 0 0 1 8.232-4.41a61 61 0 0 0-.491-6.347z"/></svg>`,
 		},
 		{
 			name: "Solid icon with default attributes",
@@ -47,18 +47,21 @@ func TestIcon_String(t *testing.T) {
 			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="currentColor" focusable="false"><path d="M10 20a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/></svg>`,
 		},
 		{
-			name: "Micro icon with attributes",
+			name: "Micro icon with stroke and fill attributes",
 			icon: &Icon{
-				Name: "academic-cap-micro",
-				Body: `<path d="M8 16a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/>`,
-				Size: "16",
-				Type: "Micro",
+				Name:        "academic-cap-micro",
+				Body:        `<path d="M8 16a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/>`,
+				Size:        "16",
+				Type:        "Micro",
+				Stroke:      "#000000",
+				StrokeWidth: "2",
+				Fill:        "#FFFFFF",
 				Attrs: templ.Attributes{
 					"aria-hidden": "true",
 					"class":       "icon-micro",
 				},
 			},
-			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="icon-micro"><path d="M8 16a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/></svg>`,
+			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="#FFFFFF" aria-hidden="true" class="icon-micro"><path d="M8 16a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/></svg>`,
 		},
 		{
 			name: "Fallback case",
@@ -73,9 +76,7 @@ func TestIcon_String(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt // Capture range variable for parallel tests.
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel() // Run test in parallel.
 			result := strings.TrimSpace(tt.icon.String())
 			expected := strings.TrimSpace(tt.expected)
 
@@ -83,6 +84,27 @@ func TestIcon_String(t *testing.T) {
 				t.Errorf("String() = %q, want %q", result, expected)
 			}
 		})
+	}
+}
+
+func TestIcon_Setters(t *testing.T) {
+	icon := &Icon{
+		Name: "test-icon",
+		Body: `<path d="M10 20a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/>`,
+		Size: "24",
+		Type: "Outline",
+	}
+
+	icon.SetStroke("#FF0000").SetStrokeWidth("2").SetFill("#0000FF")
+
+	if icon.Stroke != "#FF0000" {
+		t.Errorf("SetStroke failed: expected #FF0000, got %s", icon.Stroke)
+	}
+	if icon.StrokeWidth != "2" {
+		t.Errorf("SetStrokeWidth failed: expected 2, got %s", icon.StrokeWidth)
+	}
+	if icon.Fill != "#0000FF" {
+		t.Errorf("SetFill failed: expected #0000FF, got %s", icon.Fill)
 	}
 }
 
@@ -114,7 +136,7 @@ func TestIcon_SetAttrs(t *testing.T) {
 		}
 	}
 
-	expectedSVG := `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" custom-attr="custom-val" focusable="false"><path d="M10 20a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/></svg>`
+	expectedSVG := `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor" aria-hidden="true" custom-attr="custom-val" focusable="false"><path d="M10 20a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/></svg>`
 	if svg := icon.String(); svg != expectedSVG {
 		t.Errorf("String() = %s, want %s", svg, expectedSVG)
 	}

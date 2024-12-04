@@ -19,11 +19,32 @@ func (s Size) String() string {
 
 // Icon represents a single icon with its attributes.
 type Icon struct {
-	Name  string `json:"name"`
-	Type  string `json:"type"` // Type is either "Outline", "Solid", "Mini", or "Micro"
-	Size  Size   `json:"size"`
-	Body  string `json:"body"`
-	Attrs templ.Attributes
+	Name        string `json:"name"`
+	Type        string `json:"type"` // Type is either "Outline", "Solid", "Mini", or "Micro"
+	Size        Size   `json:"size"`
+	Body        string `json:"body"`
+	Stroke      string
+	StrokeWidth string
+	Fill        string
+	Attrs       templ.Attributes
+}
+
+// SetStroke sets the stroke attribute for the SVG tag.
+func (i *Icon) SetStroke(value string) *Icon {
+	i.Stroke = value
+	return i
+}
+
+// SetStrokeWidth sets the stroke-width attribute for the SVG tag.
+func (i *Icon) SetStrokeWidth(value string) *Icon {
+	i.StrokeWidth = value
+	return i
+}
+
+// SetFill sets the fill attribute for the SVG tag.
+func (i *Icon) SetFill(value string) *Icon {
+	i.Fill = value
+	return i
 }
 
 // SetAttrs sets the attributes for the SVG tag.
@@ -32,23 +53,49 @@ func (i *Icon) SetAttrs(attrs templ.Attributes) *Icon {
 	return i
 }
 
+func (i *Icon) ensureDefaults() {
+	// Set default fill based on the icon type
+	if i.Fill == "" {
+		switch i.Type {
+		case "Outline":
+			i.Fill = "none"
+		default: // Applies to "Solid", "Mini", "Micro" and other types
+			i.Fill = "currentColor"
+		}
+	}
+
+	if i.Stroke == "" {
+		i.Stroke = "currentColor"
+	}
+
+	if i.StrokeWidth == "" {
+		i.StrokeWidth = "1.5"
+	}
+}
+
 // String returns the SVG data of the Icon, including updated size and attributes.
 func (i *Icon) String() string {
 	var builder strings.Builder
 
-	// Generate the appropriate SVG opening tag based on the Type.
-	switch i.Type {
-	case "Outline":
-		fmt.Fprintf(&builder, `<svg xmlns="http://www.w3.org/2000/svg" width="%s" height="%s" fill="none" viewBox="0 0 %s %s" stroke-width="1.5" stroke="currentColor"`,
-			i.Size.String(), i.Size.String(), i.Size.String(), i.Size.String())
-	case "Solid", "Mini", "Micro":
-		fmt.Fprintf(&builder, `<svg xmlns="http://www.w3.org/2000/svg" width="%s" height="%s" viewBox="0 0 %s %s" fill="currentColor"`,
-			i.Size.String(), i.Size.String(), i.Size.String(), i.Size.String())
-	default:
-		builder.WriteString(`<svg xmlns="http://www.w3.org/2000/svg"`) // Fallback
+	// Ensure defaults are set.
+	i.ensureDefaults()
+
+	// Start the <svg> tag.
+	if i.Type == "Outline" || i.Type == "Solid" || i.Type == "Mini" || i.Type == "Micro" {
+		fmt.Fprintf(&builder, `<svg xmlns="http://www.w3.org/2000/svg" width="%[1]s" height="%[1]s" viewBox="0 0 %[1]s %[1]s"`, i.Size.String())
+	} else {
+		builder.WriteString(`<svg xmlns="http://www.w3.org/2000/svg"`)
 	}
 
-	// Add attributes to the opening SVG tag.
+	// Add attributes based on the type.
+	switch i.Type {
+	case "Outline":
+		fmt.Fprintf(&builder, ` fill="none" stroke-width="%s" stroke="%s"`, i.StrokeWidth, i.Stroke)
+	case "Solid", "Mini", "Micro":
+		fmt.Fprintf(&builder, ` fill="%s"`, i.Fill)
+	}
+
+	// Add user-defined attributes in deterministic order.
 	addAttributesToSVG(&builder, i.Attrs)
 
 	// Close the opening SVG tag.
