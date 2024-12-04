@@ -20,9 +20,9 @@ func (s Size) String() string {
 // Icon represents a single icon with its attributes.
 type Icon struct {
 	Name  string `json:"name"`
-	Body  string `json:"body"`
-	Size  Size   `json:"size"`
 	Type  string `json:"type"` // Type is either "Outline", "Solid", "Mini", or "Micro"
+	Size  Size   `json:"size"`
+	Body  string `json:"body"`
 	Attrs templ.Attributes
 }
 

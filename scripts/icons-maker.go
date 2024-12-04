@@ -179,8 +179,8 @@ func generateGoFile(outputFilePath string, icons map[string]heroicons.Icon) erro
 	builder.WriteString("package templheroicons\n\nvar (\n")
 	var structs []string
 	for _, icon := range icons {
-		structs = append(structs, fmt.Sprintf("\t%s = &Icon{Name: \"%s\", Body: `%s`, Size: \"%s\", Type: \"%s\"}\n",
-			generateStructName(icon), icon.Name, icon.Body, icon.Size.String(), icon.Type))
+		structs = append(structs, fmt.Sprintf("\t%s = &Icon{Name: \"%s\", Type: \"%s\", Size: \"%s\", Body: `%s`}\n",
+			generateStructName(icon), icon.Name, icon.Type, icon.Size.String(), icon.Body))
 	}
 	sort.Strings(structs)
 	for _, structDef := range structs {
