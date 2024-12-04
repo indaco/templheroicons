@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/a-h/templ"
@@ -27,6 +28,12 @@ type Icon struct {
 	StrokeWidth string
 	Fill        string
 	Attrs       templ.Attributes
+}
+
+// SetSize sets the icon size in pixels.
+func (i *Icon) SetSize(size int) *Icon {
+	i.Size = Size(strconv.Itoa(size))
+	return i
 }
 
 // SetStroke sets the stroke attribute for the SVG tag.

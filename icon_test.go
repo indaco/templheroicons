@@ -73,6 +73,20 @@ func TestIcon_String(t *testing.T) {
 			},
 			expected: `<svg xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"/></svg>`,
 		},
+		{
+			name: "SetSize modifies size",
+			icon: func() *Icon {
+				icon := &Icon{
+					Name: "resizable-icon",
+					Body: `<circle cx="12" cy="12" r="10"/>`,
+					Size: "24",
+					Type: "Outline",
+				}
+				icon.SetSize(32)
+				return icon
+			}(),
+			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none" stroke-width="1.5" stroke="currentColor"><circle cx="12" cy="12" r="10"/></svg>`,
+		},
 	}
 
 	for _, tt := range tests {
@@ -87,6 +101,48 @@ func TestIcon_String(t *testing.T) {
 	}
 }
 
+func TestIcon_SetSize(t *testing.T) {
+	tests := []struct {
+		name     string
+		initial  Size
+		newSize  int
+		expected Size
+	}{
+		{
+			name:     "Set size to 24",
+			initial:  "16",
+			newSize:  24,
+			expected: "24",
+		},
+		{
+			name:     "Set size to 32",
+			initial:  "24",
+			newSize:  32,
+			expected: "32",
+		},
+		{
+			name:     "Set size to 48",
+			initial:  "20",
+			newSize:  48,
+			expected: "48",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			icon := &Icon{
+				Size: tt.initial,
+			}
+
+			icon.SetSize(tt.newSize)
+
+			if icon.Size != tt.expected {
+				t.Errorf("SetSize() = %q, want %q", icon.Size, tt.expected)
+			}
+		})
+	}
+}
+
 func TestIcon_Setters(t *testing.T) {
 	icon := &Icon{
 		Name: "test-icon",
@@ -95,8 +151,13 @@ func TestIcon_Setters(t *testing.T) {
 		Type: "Outline",
 	}
 
-	icon.SetStroke("#FF0000").SetStrokeWidth("2").SetFill("#0000FF")
+	// Test setters
+	icon.SetStroke("#FF0000").
+		SetStrokeWidth("2").
+		SetFill("#0000FF").
+		SetSize(32)
 
+	// Validate the individual fields
 	if icon.Stroke != "#FF0000" {
 		t.Errorf("SetStroke failed: expected #FF0000, got %s", icon.Stroke)
 	}
@@ -106,6 +167,10 @@ func TestIcon_Setters(t *testing.T) {
 	if icon.Fill != "#0000FF" {
 		t.Errorf("SetFill failed: expected #0000FF, got %s", icon.Fill)
 	}
+	if icon.Size.String() != "32" {
+		t.Errorf("SetSize failed: expected 32, got %s", icon.Size.String())
+	}
+
 }
 
 func TestIcon_SetAttrs(t *testing.T) {
