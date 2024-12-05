@@ -91,7 +91,7 @@ func fetchDatasetWithRetry(url string, maxRetries int, delay time.Duration) ([]b
 // Fetches and caches the dataset.
 func fetchAndCacheDataset(url string, cachePath string, maxAge time.Duration) ([]byte, error) {
 	if isCacheValid(cachePath, maxAge) {
-		log.Println("Using cached dataset.")
+		log.Println("Using cached dataset...")
 		return loadCache(cachePath)
 	}
 	data, err := fetchDatasetWithRetry(url, maxRetries, retryDelay)
@@ -117,6 +117,11 @@ func parseIcons(jsonData []byte) (map[string]*heroicons.Icon, error) {
 
 	if err := json.Unmarshal(jsonData, &jsonDataStruct); err != nil {
 		return nil, err
+	}
+
+	// Check if the `icons` map is  empty
+	if len(jsonDataStruct.Icons) == 0 {
+		return nil, fmt.Errorf("no icons found in JSON data")
 	}
 
 	icons := make(map[string]*heroicons.Icon)
@@ -204,20 +209,44 @@ func main() {
 	outputFilePath := path.Join("..", outputFile)
 
 	// Ensure the "data" directory exists.
-	dataDir := path.Dir(cacheFilePath) // Get the directory from the path.
+	dataDir := path.Dir(cacheFilePath)
 	if err := ensureDir(dataDir); err != nil {
 		log.Fatalf("Error ensuring data directory exists: %v", err)
 	}
 
-	// Fetch and parse the JSON dataset.
-	data, err := fetchAndCacheDataset(datasetURL, cacheFilePath, cacheDuration)
-	if err != nil {
-		logAndExit(err, "Fetching dataset")
-	}
+	var data []byte
+	var icons map[string]*heroicons.Icon
+	var err error
 
-	icons, err := parseIcons(data)
-	if err != nil {
-		logAndExit(err, "Parsing icons")
+	// Attempt to fetch and parse the JSON dataset.
+	forceFetch := false
+	for {
+		data, err = fetchAndCacheDataset(datasetURL, cacheFilePath, cacheDuration)
+		if err != nil {
+			logAndExit(err, "Fetching dataset")
+		}
+
+		icons, err = parseIcons(data)
+		if err == nil {
+			break // Parsing succeeded, exit the loop.
+		}
+
+		if strings.Contains(err.Error(), "no icons found in JSON data") {
+			// If icons are missing, force fetch the dataset.
+			if forceFetch {
+				logAndExit(err, "Forced fetch failed to resolve the issue")
+			}
+			log.Println("No icons found in JSON data. Forcing dataset re-fetch...")
+			forceFetch = true
+
+			// Remove the cache to ensure fresh data is fetched.
+			if err := os.Remove(cacheFilePath); err != nil && !os.IsNotExist(err) {
+				logAndExit(err, "Failed to remove cache file")
+			}
+		} else {
+			// If it's another kind of error, exit.
+			logAndExit(err, "Parsing icons")
+		}
 	}
 
 	// Generate Go file with icon definitions.
@@ -226,4 +255,5 @@ func main() {
 	}
 
 	log.Println("heroicons_generated.go successfully created.")
+
 }
