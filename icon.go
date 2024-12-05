@@ -35,34 +35,53 @@ type Icon struct {
 	mu          sync.Mutex
 }
 
+// _clone creates a new copy of the Icon.
+func (i *Icon) clone() *Icon {
+	return &Icon{
+		Name:        i.Name,
+		Type:        i.Type,
+		Size:        i.Size,
+		Stroke:      i.Stroke,
+		StrokeWidth: i.StrokeWidth,
+		Fill:        i.Fill,
+		Attrs:       i.Attrs,
+		body:        i.body,
+	}
+}
+
 // SetSize sets the icon size in pixels.
 func (i *Icon) SetSize(size int) *Icon {
-	i.Size = Size(strconv.Itoa(size))
-	return i
+	clone := i.clone()
+	clone.Size = Size(strconv.Itoa(size))
+	return clone
 }
 
 // SetStroke sets the stroke attribute for the SVG tag.
 func (i *Icon) SetStroke(value string) *Icon {
-	i.Stroke = value
-	return i
+	clone := i.clone()
+	clone.Stroke = value
+	return clone
 }
 
 // SetStrokeWidth sets the stroke-width attribute for the SVG tag.
 func (i *Icon) SetStrokeWidth(value string) *Icon {
-	i.StrokeWidth = value
-	return i
+	clone := i.clone()
+	clone.StrokeWidth = value
+	return clone
 }
 
 // SetFill sets the fill attribute for the SVG tag.
 func (i *Icon) SetFill(value string) *Icon {
-	i.Fill = value
-	return i
+	clone := i.clone()
+	clone.Fill = value
+	return clone
 }
 
 // SetAttrs sets the attributes for the SVG tag.
 func (i *Icon) SetAttrs(attrs templ.Attributes) *Icon {
-	i.Attrs = attrs
-	return i
+	clone := i.clone()
+	clone.Attrs = attrs
+	return clone
 }
 
 func (i *Icon) ensureDefaults() {
@@ -105,12 +124,9 @@ func (i *Icon) String() string {
 
 	var builder strings.Builder
 
-	// Start the <svg> tag.
-	if i.Type == "Outline" || i.Type == "Solid" || i.Type == "Mini" || i.Type == "Micro" {
-		fmt.Fprintf(&builder, `<svg xmlns="http://www.w3.org/2000/svg" width="%[1]s" height="%[1]s" viewBox="0 0 %[1]s %[1]s"`, i.Size.String())
-	} else {
-		builder.WriteString(`<svg xmlns="http://www.w3.org/2000/svg"`)
-	}
+	// Start the <svg> tag with common attributes.
+	builder.WriteString(`<svg xmlns="http://www.w3.org/2000/svg"`)
+	fmt.Fprintf(&builder, ` width="%[1]s" height="%[1]s" viewBox="0 0 %[2]s %[2]s"`, i.Size.String(), getViewBox(i.Type))
 
 	// Add attributes based on the type.
 	switch i.Type {
@@ -137,6 +153,18 @@ func (i *Icon) String() string {
 
 func (i *Icon) Render() templ.Component {
 	return templ.Raw(i.String())
+}
+
+// getViewBox returns the appropriate viewBox size based on the icon type.
+func getViewBox(iconType string) string {
+	switch iconType {
+	case "Mini":
+		return "20"
+	case "Micro":
+		return "16"
+	default:
+		return "24" // Default for "Outline" and "Solid".
+	}
 }
 
 // getIconBody retrieves the body of an icon by its name.

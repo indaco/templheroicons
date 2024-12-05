@@ -94,21 +94,21 @@ func TestIcon_String(t *testing.T) {
 				icon.body = `<circle cx="12" cy="12" r="10"/>`
 				return icon
 			},
-			expected: `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke-width="1.5" stroke="currentColor"><circle cx="12" cy="12" r="10"/></svg>`,
+			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke-width="1.5" stroke="currentColor"><circle cx="12" cy="12" r="10"/></svg>`,
 		},
 		{
 			name: "SetSize modifies size",
 			setup: func() *Icon {
-				icon := &Icon{
+				originalIcon := &Icon{
 					Name: "resizable-icon",
 					Size: "24",
 					Type: "Outline",
 				}
-				icon.body = `<circle cx="12" cy="12" r="10"/>`
-				icon.SetSize(32)
-				return icon
+				originalIcon.body = `<circle cx="12" cy="12" r="10"/>`
+				// Capture the returned icon after setting size
+				return originalIcon.SetSize(32)
 			},
-			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none" stroke-width="1.5" stroke="currentColor"><circle cx="12" cy="12" r="10"/></svg>`,
+			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor"><circle cx="12" cy="12" r="10"/></svg>`,
 		},
 	}
 
@@ -154,56 +154,75 @@ func TestIcon_SetSize(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			icon := &Icon{
+			originalIcon := &Icon{
 				Size: tt.initial,
 			}
 
-			icon.SetSize(tt.newSize)
+			clonedIcon := originalIcon.SetSize(tt.newSize)
 
-			if icon.Size != tt.expected {
-				t.Errorf("SetSize() = %q, want %q", icon.Size, tt.expected)
+			if clonedIcon.Size != tt.expected {
+				t.Errorf("SetSize() = %q, want %q", clonedIcon.Size, tt.expected)
+			}
+
+			// Ensure original icon is unchanged
+			if originalIcon.Size != tt.initial {
+				t.Errorf("Original icon size modified: got %q, want %q", originalIcon.Size, tt.initial)
 			}
 		})
 	}
 }
 
 func TestIcon_Setters(t *testing.T) {
-	icon := &Icon{
+	originalIcon := &Icon{
 		Name: "test-icon",
 		Size: "24",
 		Type: "Outline",
 	}
 
-	// Test setters
-	icon.SetStroke("#FF0000").
+	// Chain the setters and capture the returned icon
+	finalIcon := originalIcon.SetStroke("#FF0000").
 		SetStrokeWidth("2").
 		SetFill("#0000FF").
 		SetSize(32)
 
-	// Validate the individual fields
-	if icon.Stroke != "#FF0000" {
-		t.Errorf("SetStroke failed: expected #FF0000, got %s", icon.Stroke)
+	// Validate the individual fields on the returned icon
+	if finalIcon.Stroke != "#FF0000" {
+		t.Errorf("SetStroke failed: expected #FF0000, got %s", finalIcon.Stroke)
 	}
-	if icon.StrokeWidth != "2" {
-		t.Errorf("SetStrokeWidth failed: expected 2, got %s", icon.StrokeWidth)
+	if finalIcon.StrokeWidth != "2" {
+		t.Errorf("SetStrokeWidth failed: expected 2, got %s", finalIcon.StrokeWidth)
 	}
-	if icon.Fill != "#0000FF" {
-		t.Errorf("SetFill failed: expected #0000FF, got %s", icon.Fill)
+	if finalIcon.Fill != "#0000FF" {
+		t.Errorf("SetFill failed: expected #0000FF, got %s", finalIcon.Fill)
 	}
-	if icon.Size.String() != "32" {
-		t.Errorf("SetSize failed: expected 32, got %s", icon.Size.String())
+	if finalIcon.Size.String() != "32" {
+		t.Errorf("SetSize failed: expected 32, got %s", finalIcon.Size.String())
+	}
+
+	// Ensure the original icon remains unchanged
+	if originalIcon.Size.String() != "24" {
+		t.Errorf("Original icon size modified: expected 24, got %s", originalIcon.Size.String())
+	}
+	if originalIcon.Stroke != "" {
+		t.Errorf("Original icon stroke modified: expected empty, got %s", originalIcon.Stroke)
+	}
+	if originalIcon.StrokeWidth != "" {
+		t.Errorf("Original icon stroke-width modified: expected empty, got %s", originalIcon.StrokeWidth)
+	}
+	if originalIcon.Fill != "" {
+		t.Errorf("Original icon fill modified: expected empty, got %s", originalIcon.Fill)
 	}
 }
 
 func TestIcon_SetAttrs(t *testing.T) {
 	t.Parallel() // Run test in parallel.
 
-	icon := &Icon{
+	originalIcon := &Icon{
 		Name: "test-icon",
 		Size: "24",
 		Type: "Outline",
 	}
-	icon.body = `<path d="M10 20a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/>`
+	originalIcon.body = `<path d="M10 20a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/>`
 
 	attrs := templ.Attributes{
 		"aria-hidden": "true",
@@ -211,21 +230,27 @@ func TestIcon_SetAttrs(t *testing.T) {
 		"focusable":   "false",
 	}
 
-	icon.SetAttrs(attrs)
+	// Capture the returned icon after setting attributes
+	finalIcon := originalIcon.SetAttrs(attrs)
 
-	if len(icon.Attrs) != len(attrs) {
-		t.Errorf("expected %d attributes, got %d", len(attrs), len(icon.Attrs))
+	if len(finalIcon.Attrs) != len(attrs) {
+		t.Errorf("expected %d attributes, got %d", len(attrs), len(finalIcon.Attrs))
 	}
 
 	for key, expectedValue := range attrs {
-		if value, exists := icon.Attrs[key]; !exists || value != expectedValue {
+		if value, exists := finalIcon.Attrs[key]; !exists || value != expectedValue {
 			t.Errorf("expected attribute %s=%s, got %s", key, expectedValue, value)
 		}
 	}
 
 	expectedSVG := `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor" aria-hidden="true" custom-attr="custom-val" focusable="false"><path d="M10 20a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/></svg>`
-	if svg := icon.String(); svg != expectedSVG {
+	if svg := finalIcon.String(); svg != expectedSVG {
 		t.Errorf("String() = %s, want %s", svg, expectedSVG)
+	}
+
+	// Ensure the original icon remains unchanged
+	if len(originalIcon.Attrs) != 0 {
+		t.Errorf("Original icon attributes modified: expected 0, got %d", len(originalIcon.Attrs))
 	}
 }
 
