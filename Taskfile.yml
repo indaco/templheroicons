@@ -17,6 +17,5 @@ tasks:
   build:
     desc: Generate the Go icon definitions based on parsed data/heroicons_cache.json file.
     silent: true
-    dir: './scripts/'
     cmds:
-      - go run icons-maker.go
+      - go run cmd/icons-maker.go
