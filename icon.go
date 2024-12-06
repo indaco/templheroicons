@@ -14,6 +14,11 @@ import (
 	"github.com/a-h/templ"
 )
 
+var (
+	iconBodyCache = map[string]string{}
+	cacheMutex    sync.Mutex
+)
+
 // Size represents the size of UI components (e.g., small, medium, large).
 type Size string
 
@@ -32,7 +37,6 @@ type Icon struct {
 	Fill        string `json:"fill,omitempty"`
 	Attrs       templ.Attributes
 	body        string // Cached Body
-	mu          sync.Mutex
 }
 
 // _clone creates a new copy of the Icon.
@@ -109,17 +113,13 @@ func (i *Icon) String() string {
 	// Ensure defaults are set.
 	i.ensureDefaults()
 
+	// Fetch the body if it's not cached.
 	if i.body == "" {
-		i.mu.Lock()
-		defer i.mu.Unlock()
-
-		if i.body == "" { // Double-check after locking
-			body, err := getIconBody(i.Name)
-			if err != nil {
-				return fmt.Sprintf("<!-- Error: %s -->", err)
-			}
-			i.body = body
+		body, err := getIconBody(i.Name)
+		if err != nil {
+			return fmt.Sprintf("<!-- Error: %s -->", err)
 		}
+		i.body = body
 	}
 
 	var builder strings.Builder
@@ -167,42 +167,42 @@ func getViewBox(iconType string) string {
 	}
 }
 
-// getIconBody retrieves the body of an icon by its name.
+// getIconBody retrieves the body of an icon by its name, with thread-safe caching.
 func getIconBody(name string) (string, error) {
-	var loadError error
 
-	// Load and parse the JSON only once
-	iconDataOnce.Do(func() {
-		iconData = make(map[string]string)
+	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
 
-		var parsedData struct {
-			Icons map[string]struct {
-				Body string `json:"body"`
-			} `json:"icons"`
-		}
-
-		jsonFilename := "data/heroicons_cache.json"
-		heroiconsData, _ := heroiconsJSONSource.Open(jsonFilename)
-		defer heroiconsData.Close()
-
-		data, _ := io.ReadAll(heroiconsData)
-
-		if err := json.Unmarshal(data, &parsedData); err != nil {
-			loadError = fmt.Errorf("failed to parse heroicons JSON: %w", err)
-			return
-		}
-
-		for iconName, icon := range parsedData.Icons {
-			iconData[iconName] = icon.Body
-		}
-	})
-
-	if loadError != nil {
-		return "", loadError
+	// Check if the body is already cached.
+	if body, found := iconBodyCache[name]; found {
+		return body, nil
 	}
 
-	// Lookup the icon body
-	body, exists := iconData[name]
+	// Load and parse the JSON only once (controlled elsewhere).
+	var parsedData struct {
+		Icons map[string]struct {
+			Body string `json:"body"`
+		} `json:"icons"`
+	}
+
+	// Read and parse the JSON data.
+	jsonFilename := "data/heroicons_cache.json"
+	heroiconsData, _ := heroiconsJSONSource.Open(jsonFilename)
+	defer heroiconsData.Close()
+
+	data, _ := io.ReadAll(heroiconsData)
+
+	if err := json.Unmarshal(data, &parsedData); err != nil {
+		return "", fmt.Errorf("failed to parse heroicons JSON: %w", err)
+	}
+
+	// Populate the cache.
+	for iconName, icon := range parsedData.Icons {
+		iconBodyCache[iconName] = icon.Body
+	}
+
+	// Return the requested icon body.
+	body, exists := iconBodyCache[name]
 	if !exists {
 		return "", fmt.Errorf("icon '%s' not found", name)
 	}

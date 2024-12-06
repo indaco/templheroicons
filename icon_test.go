@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/fs"
 	"strings"
-	"sync"
 	"testing"
 
 	"github.com/a-h/templ"
@@ -513,13 +512,10 @@ func TestGetIconBody_JSONParsing(t *testing.T) {
 				if err == nil || !strings.Contains(err.Error(), tt.expectedError) {
 					t.Errorf("Expected error %q, got %v", tt.expectedError, err)
 				}
-			} else {
-				if err != nil {
-					t.Errorf("Unexpected error: %v", err)
-				}
-				if result != tt.expectedResult {
-					t.Errorf("Expected result %q, got %q", tt.expectedResult, result)
-				}
+			} else if err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			} else if result != tt.expectedResult {
+				t.Errorf("Expected result %q, got %q", tt.expectedResult, result)
 			}
 		})
 	}
@@ -563,8 +559,7 @@ func (f *mockFile) Stat() (fs.FileInfo, error) {
 }
 
 func resetTestState() {
-	iconDataOnce = sync.Once{}
-	iconData = nil
+	iconBodyCache = map[string]string{}
 }
 
 func TestMockFS(t *testing.T) {
