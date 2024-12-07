@@ -1,13 +1,13 @@
 package templheroicons
 
 import (
+	"context"
 	_ "embed"
 	"encoding/json"
 	"fmt"
 	"html"
 	"io"
 	"sort"
-	"strconv"
 	"strings"
 	"sync"
 
@@ -39,120 +39,68 @@ type Icon struct {
 	body        string // Cached Body
 }
 
-// _clone creates a new copy of the Icon.
-func (i *Icon) clone() *Icon {
-	return &Icon{
-		Name:        i.Name,
-		Type:        i.Type,
-		Size:        i.Size,
-		Stroke:      i.Stroke,
-		StrokeWidth: i.StrokeWidth,
-		Fill:        i.Fill,
-		Attrs:       i.Attrs,
-		body:        i.body,
-	}
+func (i *Icon) Render() templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		_, err := io.WriteString(w, makeSVGTag(i))
+		return err
+	})
+	//return templ.Raw(i.String())
 }
 
-// SetSize sets the icon size in pixels.
-func (i *Icon) SetSize(size int) *Icon {
-	clone := i.clone()
-	clone.Size = Size(strconv.Itoa(size))
-	return clone
-}
-
-// SetStroke sets the stroke attribute for the SVG tag.
-func (i *Icon) SetStroke(value string) *Icon {
-	clone := i.clone()
-	clone.Stroke = value
-	return clone
-}
-
-// SetStrokeWidth sets the stroke-width attribute for the SVG tag.
-func (i *Icon) SetStrokeWidth(value string) *Icon {
-	clone := i.clone()
-	clone.StrokeWidth = value
-	return clone
-}
-
-// SetFill sets the fill attribute for the SVG tag.
-func (i *Icon) SetFill(value string) *Icon {
-	clone := i.clone()
-	clone.Fill = value
-	return clone
-}
-
-// SetAttrs sets the attributes for the SVG tag.
-func (i *Icon) SetAttrs(attrs templ.Attributes) *Icon {
-	clone := i.clone()
-	clone.Attrs = attrs
-	return clone
-}
-
-func (i *Icon) ensureDefaults() {
-	// Set default fill based on the icon type
-	if i.Fill == "" {
-		switch i.Type {
-		case "Outline":
-			i.Fill = "none"
-		default: // Applies to "Solid", "Mini", "Micro" and other types
-			i.Fill = "currentColor"
-		}
+func makeSVGTag(icon *Icon) string {
+	fill := "currentColor"
+	if icon.Fill != "" {
+		fill = icon.Fill // Explicitly set fill takes priority
+	} else if icon.Type == "Outline" {
+		fill = "none" // Fallback for Outline type
 	}
 
-	if i.Stroke == "" {
-		i.Stroke = "currentColor"
+	stroke := "currentColor"
+	if icon.Stroke != "" {
+		stroke = icon.Stroke
 	}
 
-	if i.StrokeWidth == "" {
-		i.StrokeWidth = "1.5"
+	strokeWidth := "1.5"
+	if icon.StrokeWidth != "" {
+		strokeWidth = icon.StrokeWidth
 	}
-}
-
-// String returns the SVG data of the Icon, including updated size and attributes.
-func (i *Icon) String() string {
-	// Ensure defaults are set.
-	i.ensureDefaults()
 
 	// Fetch the body if it's not cached.
-	if i.body == "" {
-		body, err := getIconBody(i.Name)
+	if icon.body == "" {
+		body, err := getIconBody(icon.Name)
 		if err != nil {
 			return fmt.Sprintf("<!-- Error: %s -->", err)
 		}
-		i.body = body
+		icon.body = body
 	}
 
 	var builder strings.Builder
 
 	// Start the <svg> tag with common attributes.
 	builder.WriteString(`<svg xmlns="http://www.w3.org/2000/svg"`)
-	fmt.Fprintf(&builder, ` width="%[1]s" height="%[1]s" viewBox="0 0 %[2]s %[2]s"`, i.Size.String(), getViewBox(i.Type))
+	fmt.Fprintf(&builder, ` width="%[1]s" height="%[1]s" viewBox="0 0 %[2]s %[2]s"`, icon.Size.String(), getViewBox(icon.Type))
 
 	// Add attributes based on the type.
-	switch i.Type {
+	switch icon.Type {
 	case "Outline":
-		fmt.Fprintf(&builder, ` fill="none" stroke-width="%s" stroke="%s"`, i.StrokeWidth, i.Stroke)
+		fmt.Fprintf(&builder, ` fill="%s" stroke-width="%s" stroke="%s"`, fill, strokeWidth, stroke)
 	case "Solid", "Mini", "Micro":
-		fmt.Fprintf(&builder, ` fill="%s"`, i.Fill)
+		fmt.Fprintf(&builder, ` fill="%s"`, fill)
 	default:
-		fmt.Fprintf(&builder, ` fill="%s" stroke-width="%s" stroke="%s"`, i.Fill, i.StrokeWidth, i.Stroke)
+		fmt.Fprintf(&builder, ` fill="%s" stroke-width="%s" stroke="%s"`, fill, strokeWidth, stroke)
 	}
 
 	// Add user-defined attributes in deterministic order.
-	addAttributesToSVG(&builder, i.Attrs)
+	addAttributesToSVG(&builder, icon.Attrs)
 
 	// Close the opening SVG tag.
 	builder.WriteString(">")
 
 	// Append the SVG body and close the tag.
-	builder.WriteString(i.body)
+	builder.WriteString(icon.body)
 	builder.WriteString(`</svg>`)
 
 	return builder.String()
-}
-
-func (i *Icon) Render() templ.Component {
-	return templ.Raw(i.String())
 }
 
 // getViewBox returns the appropriate viewBox size based on the icon type.

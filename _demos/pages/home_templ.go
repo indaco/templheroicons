@@ -51,7 +51,7 @@ func HomePage() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = heroicons.Moon.SetSize(32).Render().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = heroicons.ConfigureIcon(heroicons.Moon).SetSize(32).Build().Render().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -59,7 +59,7 @@ func HomePage() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = heroicons.Map.SetStroke("#34d399").SetStrokeWidth("2").Render().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = heroicons.ConfigureIcon(heroicons.RocketLaunch).SetSize(48).Build().Render().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

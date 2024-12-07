@@ -7,7 +7,7 @@
     </a>
     &nbsp;
     <a href="https://goreportcard.com/report/github.com/indaco/templheroicons" target="_blank">
-        <img src="https://goreportcard.com/badge/indaco/templheroicons" alt="go report card" />
+        <img src="https://goreportcard.com/badge/github.com/indaco/templheroicons" alt="go report card" />
     </a>
     &nbsp;
     <a href="https://coveralls.io/github/indaco/templheroicons?branch=main">
@@ -87,6 +87,8 @@ templ DemoPage() {
 
 ### Customizing Icons
 
+With the `ConfigureIcon` builder pattern, you can customize the icons more fluently and efficiently. This approach allows to chain multiple customization methods together. Once you've set your desired properties, call `Build()` to get the final icon, which you can render directly as templ component.
+
 #### 1. SetAttrs()
 
 You can also use the `SetAttrs()` method to add custom attributes to your icons, such as _aria-hidden_, _focusable_, or custom CSS classes:
@@ -98,10 +100,13 @@ import heroicons "github.com/indaco/templheroicons"
 
 templ CustomIconPage() {
     // Add attributes to an icon
-    @heroicons.Moon.SetAttrs(templ.Attributes{
-        "aria-hidden": "true",
-        "class":       "custom-icon",
-    }).Render()
+    @heroicons.ConfigureIcon(heroicons.Moon).
+        SetAttrs(templ.Attributes{
+            "aria-hidden": "true",
+            "class":       "custom-icon",
+        }).
+        Build().
+        Render()
 }
 ```
 
@@ -116,7 +121,10 @@ import heroicons "github.com/indaco/templheroicons"
 
 templ CustomSizePage() {
     // Set custom size
-    @heroicons.Moon.SetSize(32).Render()
+    @heroicons.ConfigureIcon(heroicons.Moon).
+        SetSize(32).
+        Build().
+        Render()
 }
 ```
 
@@ -131,7 +139,11 @@ import heroicons "github.com/indaco/templheroicons"
 
 templ CustomStrokePage() {
     // Customize stroke color and width
-    @heroicons.Moon.SetStroke("#FF0000").SetStrokeWidth("2").Render()
+   @heroicons.ConfigureIcon(heroicons.Moon).
+       SetStroke("#FF0000").
+       SetStrokeWidth("2").
+       Build().
+       Render()
 }
 ```
 
@@ -146,7 +158,10 @@ import heroicons "github.com/indaco/templheroicons"
 
 templ CustomFillPage() {
     // Customize fill color
-    @heroicons.Moon.SetFill("#0000FF").Render()
+   @heroicons.ConfigureIcon(heroicons.Moon).
+       SetFill("#0000FF").
+       Build().
+       Render()
 }
 ```
 
