@@ -22,7 +22,7 @@ templ HomePage() {
 					<section class="bg-white p-6 rounded-lg shadow">
 						<h2 class="text-xl font-semibold text-neutral-900">Rendering Icons</h2>
 						<div class="mt-4">
-							<p>
+							<p class="" my-1>
 								@heroicons.Moon.Render()
 								@heroicons.MinusSmallSolid.Render()
 								@heroicons.MapMini.Render()
@@ -33,12 +33,13 @@ templ HomePage() {
 						<h2 class="text-xl font-semibold text-neutral-900">Customizing Icons</h2>
 						<div class="mt-4">
 							<h3>Set Size</h3>
-							<p>
+							<p class="my-1">
 								@heroicons.ConfigureIcon(heroicons.Moon).SetSize(32).Build().Render()
 							</p>
-							<h3>Other Setters</h3>
-							<p>
-								@heroicons.ConfigureIcon(heroicons.RocketLaunch).SetSize(48).Build().Render()
+							<h3>Set Color</h3>
+							<p class="my-1 flex gap-2">
+								@heroicons.ConfigureIcon(heroicons.MoonSolid).SetColor("#22d3ee").Build().Render()
+								@heroicons.ConfigureIcon(heroicons.RocketLaunch).SetColor("#2dd4bf").Build().Render()
 							</p>
 						</div>
 					</section>
