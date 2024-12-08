@@ -31,7 +31,13 @@
 
 This package provides the [heroicons](https://heroicons.com) set (_v2.2.0_) as reusable, type-safe go [templ](https://github.com/a-h/templ) components.
 
-The icons dataset is dynamically fetched from the [Iconify repository](https://github.com/iconify/icon-sets), ensuring the latest version is used while supporting local caching for efficiency. Icons are loaded lazily at runtime, reducing the memory footprint and ensuring optimal performance by only loading the necessary SVG data when requested.
+## Features
+
+- **Lazy Loading**: Icons are loaded on demand at runtime, reducing memory usage and improving performance.
+- **Dynamic Dataset**: Up-to-date with the latest icons from the [Iconify](https://github.com/iconify/icon-sets) repository.
+- **Customizable**: Easily adjust size, stroke, fill, and other attributes with a simple, chainable API.
+- **Memory Efficient**: Avoids preloading large datasets, reducing memory overhead.
+- **Local Caching**: Speeds up icon requests and reduces network calls with efficient local caching.
 
 ## Installation
 

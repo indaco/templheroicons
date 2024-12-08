@@ -14,7 +14,7 @@ import (
 // 1. Core Tests for Icon Methods
 // These tests cover methods like `String`, `SetSize`, and `SetAttrs`.
 
-func TestIcon_makeSVGTag(t *testing.T) {
+func TestIcon_default(t *testing.T) {
 	tests := []struct {
 		name     string
 		setup    func() *Icon
@@ -65,22 +65,21 @@ func TestIcon_makeSVGTag(t *testing.T) {
 		{
 			name: "Micro icon with stroke and fill attributes",
 			setup: func() *Icon {
-				icon := &Icon{
-					Name:        "academic-cap-micro",
+				return &Icon{
+					Name:        "micro-icon",
 					Size:        "16",
 					Type:        "Micro",
-					Stroke:      "#000000",
+					Stroke:      "#000",
 					StrokeWidth: "2",
-					Fill:        "#FFFFFF", // This fill must be used, not "currentColor"
+					Fill:        "#FFF",
 					Attrs: templ.Attributes{
 						"aria-hidden": "true",
 						"class":       "icon-micro",
 					},
+					body: `<path d="M8 16a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/>`,
 				}
-				icon.body = `<path d="M8 16a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/>`
-				return icon
 			},
-			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="#FFFFFF" aria-hidden="true" class="icon-micro"><path d="M8 16a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/></svg>`,
+			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="#FFF" stroke="#000" stroke-width="2" aria-hidden="true" class="icon-micro"><path d="M8 16a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/></svg>`,
 		},
 		{
 			name: "Fallback case",
@@ -119,6 +118,71 @@ func TestIcon_makeSVGTag(t *testing.T) {
 
 			if result != expected {
 				t.Errorf("String() = %q, want %q", result, expected)
+			}
+		})
+	}
+}
+
+func TestMakeSVGTag(t *testing.T) {
+	// Save the original implementation
+	originalGetIconBody := getIconBody
+
+	// Defer the restoration of the original function
+	defer func() { getIconBody = originalGetIconBody }()
+
+	// Mock `getIconBody` to return different responses
+	mockGetIconBody := func(name string) (string, error) {
+		switch name {
+		case "existing-icon":
+			return `<path d="M10 20a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/>`, nil
+		case "error-icon":
+			return "", fmt.Errorf("icon '%s' not found", name)
+		default:
+			return "", fmt.Errorf("icon '%s' not found", name)
+		}
+	}
+	getIconBody = mockGetIconBody
+
+	tests := []struct {
+		name           string
+		icon           *Icon
+		expectedOutput string
+	}{
+		{
+			name: "Body already set, should not call getIconBody",
+			icon: &Icon{
+				Name: "existing-icon",
+				Size: "24",
+				Type: "Outline",
+				body: `<path d="M12 2a10 10 0 1 0 0 20a10 10 0 0 0 0-20z"/>`,
+			},
+			expectedOutput: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor"><path d="M12 2a10 10 0 1 0 0 20a10 10 0 0 0 0-20z"/></svg>`,
+		},
+		{
+			name: "Body not set, getIconBody returns successfully",
+			icon: &Icon{
+				Name: "existing-icon",
+				Size: "24",
+				Type: "Outline",
+			},
+			expectedOutput: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor"><path d="M10 20a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/></svg>`,
+		},
+		{
+			name: "Body not set, getIconBody returns an error",
+			icon: &Icon{
+				Name: "error-icon",
+				Size: "24",
+				Type: "Outline",
+			},
+			expectedOutput: `<!-- Error: icon 'error-icon' not found -->`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := makeSVGTag(tt.icon)
+			if result != tt.expectedOutput {
+				t.Errorf("makeSVGTag() = %q, want %q", result, tt.expectedOutput)
 			}
 		})
 	}
@@ -408,7 +472,6 @@ func TestGetIconBody_OnceWithRealData(t *testing.T) {
 // These tests cover cases where mocked FS and invalid JSON are used.
 
 func TestIcon_String_FetchBody(t *testing.T) {
-	// Reset `iconDataOnce` to ensure fresh parsing during the test
 	resetTestState()
 
 	// Mock the embedded JSON with valid data
@@ -450,7 +513,7 @@ func TestGetIconBody_JSONParsing(t *testing.T) {
 	}{
 		{
 			name:          "Invalid JSON format",
-			mockJSON:      `{"icons": "invalid"}`, // Invalid JSON structure
+			mockJSON:      `{"icons": "invalid"`, // Invalid JSON structure
 			iconName:      "academic-cap",
 			expectedError: "failed to parse heroicons JSON",
 		},

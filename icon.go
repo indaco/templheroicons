@@ -3,7 +3,6 @@ package templheroicons
 import (
 	"context"
 	_ "embed"
-	"encoding/json"
 	"fmt"
 	"html"
 	"io"
@@ -12,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/a-h/templ"
+	"github.com/tidwall/gjson"
 )
 
 var (
@@ -44,10 +44,10 @@ func (i *Icon) Render() templ.Component {
 		_, err := io.WriteString(w, makeSVGTag(i))
 		return err
 	})
-	//return templ.Raw(i.String())
 }
 
 func makeSVGTag(icon *Icon) string {
+	// Determine fill color
 	fill := "currentColor"
 	if icon.Fill != "" {
 		fill = icon.Fill // Explicitly set fill takes priority
@@ -55,17 +55,21 @@ func makeSVGTag(icon *Icon) string {
 		fill = "none" // Fallback for Outline type
 	}
 
+	// Determine stroke color
 	stroke := "currentColor"
-	if icon.Stroke != "" {
-		stroke = icon.Stroke
+	if icon.Type == "Solid" {
+		stroke = "" // No stroke for Solid icons
+	} else if icon.Stroke != "" {
+		stroke = icon.Stroke // Custom stroke takes priority
 	}
 
+	// Determine stroke width
 	strokeWidth := "1.5"
 	if icon.StrokeWidth != "" {
 		strokeWidth = icon.StrokeWidth
 	}
 
-	// Fetch the body if it's not cached.
+	// Fetch the body if it's not cached
 	if icon.body == "" {
 		body, err := getIconBody(icon.Name)
 		if err != nil {
@@ -80,23 +84,31 @@ func makeSVGTag(icon *Icon) string {
 	builder.WriteString(`<svg xmlns="http://www.w3.org/2000/svg"`)
 	fmt.Fprintf(&builder, ` width="%[1]s" height="%[1]s" viewBox="0 0 %[2]s %[2]s"`, icon.Size.String(), getViewBox(icon.Type))
 
-	// Add attributes based on the type.
+	// Add standard svg attributes based on the type
 	switch icon.Type {
 	case "Outline":
 		fmt.Fprintf(&builder, ` fill="%s" stroke-width="%s" stroke="%s"`, fill, strokeWidth, stroke)
-	case "Solid", "Mini", "Micro":
+	case "Solid":
 		fmt.Fprintf(&builder, ` fill="%s"`, fill)
-	default:
+	case "Micro", "Mini":
+		fmt.Fprintf(&builder, ` fill="%s"`, fill)
+		if icon.Stroke != "" {
+			fmt.Fprintf(&builder, ` stroke="%s"`, stroke)
+		}
+		if icon.StrokeWidth != "" {
+			fmt.Fprintf(&builder, ` stroke-width="%s"`, strokeWidth)
+		}
+	default: // Fallback for unknown types
 		fmt.Fprintf(&builder, ` fill="%s" stroke-width="%s" stroke="%s"`, fill, strokeWidth, stroke)
 	}
 
-	// Add user-defined attributes in deterministic order.
+	// Add user-defined attributes in deterministic order
 	addAttributesToSVG(&builder, icon.Attrs)
 
-	// Close the opening SVG tag.
+	// Close the opening SVG tag
 	builder.WriteString(">")
 
-	// Append the SVG body and close the tag.
+	// Append the SVG body and close the tag
 	builder.WriteString(icon.body)
 	builder.WriteString(`</svg>`)
 
@@ -116,21 +128,13 @@ func getViewBox(iconType string) string {
 }
 
 // getIconBody retrieves the body of an icon by its name, with thread-safe caching.
-func getIconBody(name string) (string, error) {
-
+var getIconBody = func(name string) (string, error) {
 	cacheMutex.Lock()
 	defer cacheMutex.Unlock()
 
 	// Check if the body is already cached.
 	if body, found := iconBodyCache[name]; found {
 		return body, nil
-	}
-
-	// Load and parse the JSON only once (controlled elsewhere).
-	var parsedData struct {
-		Icons map[string]struct {
-			Body string `json:"body"`
-		} `json:"icons"`
 	}
 
 	// Read and parse the JSON data.
@@ -140,16 +144,24 @@ func getIconBody(name string) (string, error) {
 
 	data, _ := io.ReadAll(heroiconsData)
 
-	if err := json.Unmarshal(data, &parsedData); err != nil {
-		return "", fmt.Errorf("failed to parse heroicons JSON: %w", err)
+	// Check for valid JSON (parsing)
+	if !gjson.ValidBytes(data) {
+		return "", fmt.Errorf("failed to parse heroicons JSON")
 	}
 
-	// Populate the cache.
-	for iconName, icon := range parsedData.Icons {
-		iconBodyCache[iconName] = icon.Body
+	// Extract the icons key
+	iconsResult := gjson.GetBytes(data, "icons")
+
+	// If the icons key exists, populate the cache
+	if iconsResult.Exists() {
+		iconsResult.ForEach(func(key, value gjson.Result) bool {
+			iconBody := value.Get("body").String()
+			iconBodyCache[key.String()] = iconBody
+			return true
+		})
 	}
 
-	// Return the requested icon body.
+	// Return the requested icon body
 	body, exists := iconBodyCache[name]
 	if !exists {
 		return "", fmt.Errorf("icon '%s' not found", name)
