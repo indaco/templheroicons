@@ -40,4 +40,4 @@ test/coverage: ## Run go tests and use go tool cover
 	@go tool cover -html=coverage.out
 
 build:
-	@go run cmd/icons-maker.go
+	@cd cmd && go run icons-maker.go
