@@ -181,6 +181,7 @@ Available tasks:
 
 ```bash
 build                   # Generate the Go icon definitions based on parsed data/heroicons_cache.json file.
+demo:                   # Run the demo server.
 test                    # Run go tests.
 test/coverage:          # Run go tests and use go tool cover.
 ```

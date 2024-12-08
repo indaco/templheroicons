@@ -1,6 +1,14 @@
 version: '3'
 
 tasks:
+  templ:
+    desc: Run templ fmt and templ generate
+    internal: true
+    silent: true
+    dir: './_demos/pages/'
+    cmds:
+      - templ fmt . && templ generate
+
   test:
     desc: Run go tests.
     silent: true
@@ -20,3 +28,11 @@ tasks:
     dir: './cmd/'
     cmds:
       - go run icons-maker.go
+
+  demo:
+    desc: Run the demo server.
+    silent: true
+    dir: './_demos/'
+    deps: [templ]
+    cmds:
+      - go run main.go

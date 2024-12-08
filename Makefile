@@ -29,6 +29,14 @@ help: ## Print this help message
 	@echo ""
 
 # ==================================================================================== #
+# PRIVATE TASKS
+# ==================================================================================== #
+
+templ: ## Run templ fmt and templ generate (private)
+	@echo "$(color_cyan)Running templ fmt and templ generate in ./_demos/pages/$(color_reset)"
+	@cd ./_demos/pages/ && templ fmt . && templ generate
+
+# ==================================================================================== #
 # PUBLIC TASKS
 # ==================================================================================== #
 
@@ -39,5 +47,9 @@ test/coverage: ## Run go tests and use go tool cover
 	@go test -coverprofile=coverage.out .
 	@go tool cover -html=coverage.out
 
-build:
+build: ## Generate the Go icon definitions based on parsed data/heroicons_cache.json file.
 	@cd cmd && go run icons-maker.go
+
+demo: templ ## Run the demo server
+	@echo "$(color_cyan)Running the demo server in ./_demos/$(color_reset)"
+	@cd ./_demos/ && go run main.go
