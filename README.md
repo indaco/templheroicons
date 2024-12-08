@@ -31,13 +31,14 @@
 
 This package provides the [heroicons](https://heroicons.com) set (_v2.2.0_) as reusable, type-safe go [templ](https://github.com/a-h/templ) components.
 
+The icons dataset is dynamically fetched from the [Iconify](https://github.com/iconify/icon-sets) repository.
+
 ## Features
 
 - **Lazy Loading**: Icons are loaded on demand at runtime, reducing memory usage and improving performance.
-- **Dynamic Dataset**: Up-to-date with the latest icons from the [Iconify](https://github.com/iconify/icon-sets) repository.
-- **Customizable**: Easily adjust size, stroke, fill, and other attributes with a simple, chainable API.
+- **Customizable**: Easily adjust size, color, and add attributes with a simple, chainable API.
 - **Memory Efficient**: Avoids preloading large datasets, reducing memory overhead.
-- **Local Caching**: Speeds up icon requests and reduces network calls with efficient local caching.
+- **Local Caching**: Speeds up icon with efficient local caching.
 
 ## Installation
 
@@ -95,30 +96,9 @@ templ DemoPage() {
 
 With the `ConfigureIcon` builder pattern, you can customize the icons more fluently and efficiently. This approach allows to chain multiple customization methods together. Once you've set your desired properties, call `Build()` to get the final icon, which you can render directly as templ component.
 
-#### 1. SetAttrs()
+#### 1. SetSize()
 
-You can also use the `SetAttrs()` method to add custom attributes to your icons, such as _aria-hidden_, _focusable_, or custom CSS classes:
-
-```templ
-package pages
-
-import heroicons "github.com/indaco/templheroicons"
-
-templ CustomIconPage() {
-    // Add attributes to an icon
-    @heroicons.ConfigureIcon(heroicons.Moon).
-        SetAttrs(templ.Attributes{
-            "aria-hidden": "true",
-            "class":       "custom-icon",
-        }).
-        Build().
-        Render()
-}
-```
-
-#### 2. SetSize()
-
-Use the `SetSize()` method to set a custom size for your icon in pixels:
+Use the `SetSize()` method to set a custom size for the icon in pixels:
 
 ```templ
 package pages
@@ -134,40 +114,42 @@ templ CustomSizePage() {
 }
 ```
 
-#### 3. SetStroke() and SetStrokeWidth()
+#### 2. SetColor()
 
-Use the `SetStroke()` and `SetStrokeWidth()` methods to modify the stroke color and width for **outline** icons:
+Use the `SetColor()` method to modify the fill color for the icons:
 
 ```templ
 package pages
 
 import heroicons "github.com/indaco/templheroicons"
 
-templ CustomStrokePage() {
-    // Customize stroke color and width
+templ CustomFillColor() {
+    // Customize fill color
    @heroicons.ConfigureIcon(heroicons.Moon).
-       SetStroke("#FF0000").
-       SetStrokeWidth("2").
+       SetColor("#0000FF").
        Build().
        Render()
 }
 ```
 
-#### 4. SetFill()
+#### 3. SetAttrs()
 
-Use the `SetFill()` method to modify the fill color for **solid**, **mini** and **micro** icons:
+You can also use the `SetAttrs()` method to add custom attributes to the icons, such as _aria-hidden_, _focusable_, or custom CSS classes:
 
 ```templ
 package pages
 
 import heroicons "github.com/indaco/templheroicons"
 
-templ CustomFillPage() {
-    // Customize fill color
-   @heroicons.ConfigureIcon(heroicons.Moon).
-       SetFill("#0000FF").
-       Build().
-       Render()
+templ CustomIconPage() {
+    // Add attributes to an icon
+    @heroicons.ConfigureIcon(heroicons.Moon).
+        SetAttrs(templ.Attributes{
+            "aria-hidden": "true",
+            "class":       "custom-icon",
+        }).
+        Build().
+        Render()
 }
 ```
 

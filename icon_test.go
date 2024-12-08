@@ -66,12 +66,10 @@ func TestIcon_default(t *testing.T) {
 			name: "Micro icon with stroke and fill attributes",
 			setup: func() *Icon {
 				return &Icon{
-					Name:        "micro-icon",
-					Size:        "16",
-					Type:        "Micro",
-					Stroke:      "#000",
-					StrokeWidth: "2",
-					Fill:        "#FFF",
+					Name:  "micro-icon",
+					Size:  "16",
+					Type:  "Micro",
+					Color: "#000",
 					Attrs: templ.Attributes{
 						"aria-hidden": "true",
 						"class":       "icon-micro",
@@ -79,7 +77,7 @@ func TestIcon_default(t *testing.T) {
 					body: `<path d="M8 16a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/>`,
 				}
 			},
-			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="#FFF" stroke="#000" stroke-width="2" aria-hidden="true" class="icon-micro"><path d="M8 16a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/></svg>`,
+			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" color="#000" aria-hidden="true" class="icon-micro"><path d="M8 16a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/></svg>`,
 		},
 		{
 			name: "Fallback case",
@@ -92,7 +90,7 @@ func TestIcon_default(t *testing.T) {
 				icon.body = `<circle cx="12" cy="12" r="10"/>`
 				return icon
 			},
-			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke-width="1.5" stroke="currentColor"><circle cx="12" cy="12" r="10"/></svg>`,
+			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>`,
 		},
 		{
 			name: "SetSize modifies size",
@@ -246,17 +244,11 @@ func TestIcon_Setters(t *testing.T) {
 	}
 
 	// Chain the setters and capture the returned icon
-	finalIcon := ConfigureIcon(originalIcon).SetStroke("#FF0000").SetStrokeWidth("2").SetFill("#0000FF").SetSize(32).Build()
+	finalIcon := ConfigureIcon(originalIcon).SetColor("#FF0000").SetSize(32).Build()
 
 	// Validate the individual fields on the returned icon
-	if finalIcon.Stroke != "#FF0000" {
-		t.Errorf("SetStroke failed: expected #FF0000, got %s", finalIcon.Stroke)
-	}
-	if finalIcon.StrokeWidth != "2" {
-		t.Errorf("SetStrokeWidth failed: expected 2, got %s", finalIcon.StrokeWidth)
-	}
-	if finalIcon.Fill != "#0000FF" {
-		t.Errorf("SetFill failed: expected #0000FF, got %s", finalIcon.Fill)
+	if finalIcon.Color != "#FF0000" {
+		t.Errorf("SeColor failed: expected #FF0000, got %s", finalIcon.Color)
 	}
 	if finalIcon.Size.String() != "32" {
 		t.Errorf("SetSize failed: expected 32, got %s", finalIcon.Size.String())
@@ -266,15 +258,10 @@ func TestIcon_Setters(t *testing.T) {
 	if originalIcon.Size.String() != "24" {
 		t.Errorf("Original icon size modified: expected 24, got %s", originalIcon.Size.String())
 	}
-	if originalIcon.Stroke != "" {
-		t.Errorf("Original icon stroke modified: expected empty, got %s", originalIcon.Stroke)
+	if originalIcon.Color != "" {
+		t.Errorf("Original icon color modified: expected empty, got %s", originalIcon.Color)
 	}
-	if originalIcon.StrokeWidth != "" {
-		t.Errorf("Original icon stroke-width modified: expected empty, got %s", originalIcon.StrokeWidth)
-	}
-	if originalIcon.Fill != "" {
-		t.Errorf("Original icon fill modified: expected empty, got %s", originalIcon.Fill)
-	}
+
 }
 
 func TestIcon_SetAttrs(t *testing.T) {

@@ -23,21 +23,9 @@ func (b *IconBuilder) SetSize(size int) *IconBuilder {
 	return b
 }
 
-// SetStroke sets the stroke of the icon.
-func (b *IconBuilder) SetStroke(value string) *IconBuilder {
-	b.icon.Stroke = value
-	return b
-}
-
-// SetStrokeWidth sets the stroke-width of the icon.
-func (b *IconBuilder) SetStrokeWidth(value string) *IconBuilder {
-	b.icon.StrokeWidth = value
-	return b
-}
-
-// SetFill sets the fill of the icon.
-func (b *IconBuilder) SetFill(value string) *IconBuilder {
-	b.icon.Fill = value
+// SetColor sets the fill of the icon.
+func (b *IconBuilder) SetColor(value string) *IconBuilder {
+	b.icon.Color = value
 	return b
 }
 

@@ -1,7 +1,6 @@
 package templheroicons
 
 import (
-	"context"
 	_ "embed"
 	"fmt"
 	"html"
@@ -29,46 +28,19 @@ func (s Size) String() string {
 
 // Icon represents a single icon with its attributes.
 type Icon struct {
-	Name        string `json:"name"`
-	Type        string `json:"type"`
-	Size        Size   `json:"size"`
-	Stroke      string `json:"stroke,omitempty"`
-	StrokeWidth string `json:"strokeWidth,omitempty"`
-	Fill        string `json:"fill,omitempty"`
-	Attrs       templ.Attributes
-	body        string // Cached Body
+	Name  string `json:"name"`
+	Type  string `json:"type"`
+	Size  Size   `json:"size"`
+	Color string
+	Attrs templ.Attributes
+	body  string // Cached Body
 }
 
 func (i *Icon) Render() templ.Component {
-	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-		_, err := io.WriteString(w, makeSVGTag(i))
-		return err
-	})
+	return templ.Raw(makeSVGTag(i))
 }
 
 func makeSVGTag(icon *Icon) string {
-	// Determine fill color
-	fill := "currentColor"
-	if icon.Fill != "" {
-		fill = icon.Fill // Explicitly set fill takes priority
-	} else if icon.Type == "Outline" {
-		fill = "none" // Fallback for Outline type
-	}
-
-	// Determine stroke color
-	stroke := "currentColor"
-	if icon.Type == "Solid" {
-		stroke = "" // No stroke for Solid icons
-	} else if icon.Stroke != "" {
-		stroke = icon.Stroke // Custom stroke takes priority
-	}
-
-	// Determine stroke width
-	strokeWidth := "1.5"
-	if icon.StrokeWidth != "" {
-		strokeWidth = icon.StrokeWidth
-	}
-
 	// Fetch the body if it's not cached
 	if icon.body == "" {
 		body, err := getIconBody(icon.Name)
@@ -87,19 +59,15 @@ func makeSVGTag(icon *Icon) string {
 	// Add standard svg attributes based on the type
 	switch icon.Type {
 	case "Outline":
-		fmt.Fprintf(&builder, ` fill="%s" stroke-width="%s" stroke="%s"`, fill, strokeWidth, stroke)
-	case "Solid":
-		fmt.Fprintf(&builder, ` fill="%s"`, fill)
-	case "Micro", "Mini":
-		fmt.Fprintf(&builder, ` fill="%s"`, fill)
-		if icon.Stroke != "" {
-			fmt.Fprintf(&builder, ` stroke="%s"`, stroke)
-		}
-		if icon.StrokeWidth != "" {
-			fmt.Fprintf(&builder, ` stroke-width="%s"`, strokeWidth)
-		}
+		fmt.Fprintf(&builder, ` fill="none" stroke-width="1.5" stroke="currentColor"`)
+	case "Solid", "Micro", "Mini":
+		fmt.Fprintf(&builder, ` fill="currentColor"`)
 	default: // Fallback for unknown types
-		fmt.Fprintf(&builder, ` fill="%s" stroke-width="%s" stroke="%s"`, fill, strokeWidth, stroke)
+
+	}
+
+	if icon.Color != "" {
+		fmt.Fprintf(&builder, ` color="%s"`, icon.Color)
 	}
 
 	// Add user-defined attributes in deterministic order
