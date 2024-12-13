@@ -7,13 +7,13 @@ import (
 )
 
 type IconBuilder struct {
-	icon Icon
+	icon *Icon
 }
 
 // ConfigureIcon creates a new builder from an existing icon.
 func ConfigureIcon(icon *Icon) *IconBuilder {
 	return &IconBuilder{
-		icon: *icon, // Copy the icon (not reference)
+		icon: icon.clone(), // Clone the icon only once
 	}
 }
 
@@ -35,7 +35,10 @@ func (b *IconBuilder) SetAttrs(attrs templ.Attributes) *IconBuilder {
 	return b
 }
 
-// Build returns the final configured Icon.
-func (b *IconBuilder) Build() *Icon {
-	return &b.icon
+func (b *IconBuilder) GetIcon() *Icon {
+	return b.icon
+}
+
+func (b *IconBuilder) Render() templ.Component {
+	return b.icon.Render()
 }

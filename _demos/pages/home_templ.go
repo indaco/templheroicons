@@ -31,7 +31,7 @@ func HomePage() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>templheroicons demo</title><script src=\"https://cdn.tailwindcss.com\"></script></head><body class=\"bg-neutral-100 text-neutral-900\"><header class=\"bg-white shadow\"><div class=\"max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8\"><h1 class=\"text-3xl font-bold text-neutral-900\">templheroicons demo</h1></div></header><main class=\"min-h-screen flex flex-col items-center\"><div class=\"max-w-7xl w-full p-6 space-y-8\"><section class=\"bg-white p-6 rounded-lg shadow\"><h2 class=\"text-xl font-semibold text-neutral-900\">Rendering Icons</h2><div class=\"mt-4\"><p class=\"\" my-1>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>templheroicons demo</title><script src=\"https://cdn.tailwindcss.com\"></script></head><body class=\"bg-neutral-100 text-neutral-900\"><header class=\"bg-white shadow\"><div class=\"max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8\"><h1 class=\"text-3xl font-bold text-neutral-900\">templheroicons demo</h1></div></header><main class=\"min-h-screen flex flex-col items-center\"><div class=\"max-w-7xl w-full p-6 space-y-8\"><section class=\"bg-white p-6 rounded-lg shadow\"><h2 class=\"text-xl font-semibold text-neutral-900\">Rendering Icons</h2><div class=\"mt-4\"><p class=\"my-1 flex gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -47,11 +47,27 @@ func HomePage() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div></section><section class=\"bg-white p-6 rounded-lg shadow\"><h2 class=\"text-xl font-semibold text-neutral-900\">Customizing Icons</h2><div class=\"mt-4\"><h3>Set Size</h3><p class=\"my-1\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div></section><section class=\"bg-white p-6 rounded-lg shadow\"><h2 class=\"text-xl font-semibold text-neutral-900\">Customizing Icons</h2><div class=\"mt-4\"><h3>Set Size</h3><p class=\"my-1 flex gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = heroicons.ConfigureIcon(heroicons.Moon).SetSize(32).Build().Render().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = heroicons.ConfigureIcon(heroicons.Moon).SetSize(16).Render().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = heroicons.ConfigureIcon(heroicons.Moon).SetSize(20).Render().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = heroicons.Moon.Render().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = heroicons.ConfigureIcon(heroicons.Moon).SetSize(32).Render().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = heroicons.Moon.Render().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -59,19 +75,11 @@ func HomePage() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = heroicons.ConfigureIcon(heroicons.MoonSolid).SetColor("#22d3ee").Build().Render().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = heroicons.ConfigureIcon(heroicons.MoonSolid).SetColor("#22d3ee").Render().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = heroicons.ConfigureIcon(heroicons.RocketLaunch).SetColor("#2dd4bf").Build().Render().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><h3>Set Stroke Width</h3><p class=\"my-1 flex gap-2\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = heroicons.ConfigureIcon(heroicons.RocketLaunch).SetStrokeWidth("2").Build().Render().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = heroicons.ConfigureIcon(heroicons.RocketLaunch).SetColor("#2dd4bf").Render().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

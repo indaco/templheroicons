@@ -38,6 +38,21 @@ func (i *Icon) Render() templ.Component {
 	return templ.Raw(makeSVGTag(i))
 }
 
+func (i *Icon) clone() *Icon {
+	attrsCopy := make(templ.Attributes, len(i.Attrs))
+	for k, v := range i.Attrs {
+		attrsCopy[k] = v
+	}
+	return &Icon{
+		Name:  i.Name,
+		Type:  i.Type,
+		Size:  i.Size,
+		Color: i.Color,
+		Attrs: attrsCopy,
+		body:  i.body, // The body is shared since it's immutable
+	}
+}
+
 func (i *Icon) fetchBody() error {
 	if i.body != "" {
 		return nil // Body is already cached

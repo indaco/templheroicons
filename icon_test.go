@@ -102,7 +102,7 @@ func TestIcon_default(t *testing.T) {
 				}
 				originalIcon.body = `<circle cx="12" cy="12" r="10"/>`
 				// Capture the returned icon after setting size
-				return ConfigureIcon(originalIcon).SetSize(32).Build()
+				return ConfigureIcon(originalIcon).SetSize(32).GetIcon()
 			},
 			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor"><circle cx="12" cy="12" r="10"/></svg>`,
 		},
@@ -221,7 +221,7 @@ func TestIcon_SetSize(t *testing.T) {
 			}
 
 			// Use the ConfigureIcon builder to modify the size
-			modifiedIcon := ConfigureIcon(originalIcon).SetSize(tt.newSize).Build()
+			modifiedIcon := ConfigureIcon(originalIcon).SetSize(tt.newSize).GetIcon()
 
 			// Check that the modified icon has the expected size
 			if modifiedIcon.Size != tt.expected {
@@ -244,7 +244,7 @@ func TestIcon_Setters(t *testing.T) {
 	}
 
 	// Chain the setters and capture the returned icon
-	finalIcon := ConfigureIcon(originalIcon).SetColor("#FF0000").SetSize(32).Build()
+	finalIcon := ConfigureIcon(originalIcon).SetColor("#FF0000").SetSize(32).GetIcon()
 
 	// Validate the individual fields on the returned icon
 	if finalIcon.Color != "#FF0000" {
@@ -281,7 +281,7 @@ func TestIcon_SetAttrs(t *testing.T) {
 	}
 
 	// Capture the returned icon after setting attributes
-	finalIcon := ConfigureIcon(originalIcon).SetAttrs(attrs).Build()
+	finalIcon := ConfigureIcon(originalIcon).SetAttrs(attrs).GetIcon()
 
 	if len(finalIcon.Attrs) != len(attrs) {
 		t.Errorf("expected %d attributes, got %d", len(attrs), len(finalIcon.Attrs))
@@ -301,6 +301,79 @@ func TestIcon_SetAttrs(t *testing.T) {
 	// Ensure the original icon remains unchanged
 	if len(originalIcon.Attrs) != 0 {
 		t.Errorf("Original icon attributes modified: expected 0, got %d", len(originalIcon.Attrs))
+	}
+}
+
+func TestIcon_Clone(t *testing.T) {
+	// Original icon setup
+	originalIcon := &Icon{
+		Name:  "test-icon",
+		Type:  "Outline",
+		Size:  "24",
+		Color: "#FF0000",
+		Attrs: templ.Attributes{
+			"aria-hidden": "true",
+			"focusable":   "false",
+		},
+		body: `<path d="M10 20a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/>`,
+	}
+
+	// Clone the icon
+	clonedIcon := originalIcon.clone()
+
+	// Verify that all fields are identical
+	if clonedIcon.Name != originalIcon.Name {
+		t.Errorf("Clone failed: expected Name %q, got %q", originalIcon.Name, clonedIcon.Name)
+	}
+	if clonedIcon.Type != originalIcon.Type {
+		t.Errorf("Clone failed: expected Type %q, got %q", originalIcon.Type, clonedIcon.Type)
+	}
+	if clonedIcon.Size != originalIcon.Size {
+		t.Errorf("Clone failed: expected Size %q, got %q", originalIcon.Size, clonedIcon.Size)
+	}
+	if clonedIcon.Color != originalIcon.Color {
+		t.Errorf("Clone failed: expected Color %q, got %q", originalIcon.Color, clonedIcon.Color)
+	}
+	if clonedIcon.body != originalIcon.body {
+		t.Errorf("Clone failed: expected body %q, got %q", originalIcon.body, clonedIcon.body)
+	}
+
+	// Verify that the Attrs map is deeply copied
+	if len(clonedIcon.Attrs) != len(originalIcon.Attrs) {
+		t.Errorf("Clone failed: expected %d attributes, got %d", len(originalIcon.Attrs), len(clonedIcon.Attrs))
+	}
+	for key, originalValue := range originalIcon.Attrs {
+		clonedValue, exists := clonedIcon.Attrs[key]
+		if !exists {
+			t.Errorf("Clone failed: attribute %q is missing in the clone", key)
+		}
+		if clonedValue != originalValue {
+			t.Errorf("Clone failed: expected attribute %q to have value %q, got %q", key, originalValue, clonedValue)
+		}
+	}
+
+	// Modify the cloned attributes and verify that the original remains unchanged
+	clonedIcon.Attrs["aria-hidden"] = "false"
+	if originalIcon.Attrs["aria-hidden"] != "true" {
+		t.Errorf("Clone failed: original Attrs modified after changing clone")
+	}
+}
+
+func TestIcon_SetSizeIsolation(t *testing.T) {
+	// Create the base icon
+	Moon := &Icon{Name: "moon", Type: "Outline", Size: "24"}
+
+	// Create the builder and modify the size
+	modifiedIconBuilder := ConfigureIcon(Moon).SetSize(48)
+
+	// Ensure the modified icon has the new size
+	if modifiedIconBuilder.GetIcon().Size != "48" {
+		t.Errorf("Expected modified icon to have size 48, but got %s", modifiedIconBuilder.GetIcon().Size)
+	}
+
+	// Ensure the original Moon icon remains unchanged
+	if Moon.Size != "24" {
+		t.Errorf("Expected original icon to retain size 24, but got %s", Moon.Size)
 	}
 }
 
