@@ -102,7 +102,7 @@ func TestIcon_default(t *testing.T) {
 				}
 				originalIcon.body = `<circle cx="12" cy="12" r="10"/>`
 				// Capture the returned icon after setting size
-				return ConfigureIcon(originalIcon).SetSize(32).GetIcon()
+				return originalIcon.Config().SetSize(32).GetIcon()
 			},
 			expected: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor"><circle cx="12" cy="12" r="10"/></svg>`,
 		},
@@ -221,7 +221,7 @@ func TestIcon_SetSize(t *testing.T) {
 			}
 
 			// Use the ConfigureIcon builder to modify the size
-			modifiedIcon := ConfigureIcon(originalIcon).SetSize(tt.newSize).GetIcon()
+			modifiedIcon := originalIcon.Config().SetSize(tt.newSize).GetIcon()
 
 			// Check that the modified icon has the expected size
 			if modifiedIcon.Size != tt.expected {
@@ -244,7 +244,7 @@ func TestIcon_Setters(t *testing.T) {
 	}
 
 	// Chain the setters and capture the returned icon
-	finalIcon := ConfigureIcon(originalIcon).SetColor("#FF0000").SetSize(32).GetIcon()
+	finalIcon := originalIcon.Config().SetColor("#FF0000").SetSize(32).GetIcon()
 
 	// Validate the individual fields on the returned icon
 	if finalIcon.Color != "#FF0000" {
@@ -281,7 +281,7 @@ func TestIcon_SetAttrs(t *testing.T) {
 	}
 
 	// Capture the returned icon after setting attributes
-	finalIcon := ConfigureIcon(originalIcon).SetAttrs(attrs).GetIcon()
+	finalIcon := originalIcon.Config().SetAttrs(attrs).GetIcon()
 
 	if len(finalIcon.Attrs) != len(attrs) {
 		t.Errorf("expected %d attributes, got %d", len(attrs), len(finalIcon.Attrs))

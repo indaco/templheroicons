@@ -94,7 +94,7 @@ templ DemoPage() {
 
 ### Customizing Icons
 
-With the `ConfigureIcon` builder pattern, you can customize the icons more fluently and efficiently. This approach allows to chain multiple customization methods together. Once you've set your desired properties, call `Render()` to get the final icon directly as templ component.
+The `Config` builder pattern allows for fluent and efficient customization of icons. Chain multiple methods to configure properties like size, color, and attributes, then call Render() to generate the final icon as a templ component.
 
 #### 1. SetSize()
 
@@ -107,9 +107,7 @@ import heroicons "github.com/indaco/templheroicons"
 
 templ CustomSizePage() {
     // Set custom size
-    @heroicons.ConfigureIcon(heroicons.Moon).
-        SetSize(32).
-        Render()
+    @heroicons.Moon.Config().SetSize(32).Render()
 }
 ```
 
@@ -124,9 +122,7 @@ import heroicons "github.com/indaco/templheroicons"
 
 templ CustomFillColor() {
     // Customize fill color
-   @heroicons.ConfigureIcon(heroicons.Moon).
-       SetColor("#0000FF").
-       Render()
+   @heroicons.Moon.Config().SetColor("#0000FF").Render()
 }
 ```
 
@@ -141,7 +137,7 @@ import heroicons "github.com/indaco/templheroicons"
 
 templ CustomIconPage() {
     // Add attributes to an icon
-    @heroicons.ConfigureIcon(heroicons.Moon).
+    @heroicons.Moon.Config().
         SetAttrs(templ.Attributes{
             "aria-hidden": "true",
             "class":       "custom-icon",

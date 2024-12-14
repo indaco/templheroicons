@@ -34,16 +34,16 @@ templ HomePage() {
 						<div class="mt-4">
 							<h3>Set Size</h3>
 							<p class="my-1 flex gap-2">
-								@heroicons.ConfigureIcon(heroicons.Moon).SetSize(16).Render()
-								@heroicons.ConfigureIcon(heroicons.Moon).SetSize(20).Render()
+								@heroicons.Moon.Config().SetSize(16).Render()
+								@heroicons.Moon.Config().SetSize(20).Render()
 								@heroicons.Moon.Render()
-								@heroicons.ConfigureIcon(heroicons.Moon).SetSize(32).Render()
+								@heroicons.Moon.Config().SetSize(32).Render()
 								@heroicons.Moon.Render()
 							</p>
 							<h3>Set Color</h3>
 							<p class="my-1 flex gap-2">
-								@heroicons.ConfigureIcon(heroicons.MoonSolid).SetColor("#22d3ee").Render()
-								@heroicons.ConfigureIcon(heroicons.RocketLaunch).SetColor("#2dd4bf").Render()
+								@heroicons.MoonSolid.Config().SetColor("#22d3ee").Render()
+								@heroicons.RocketLaunch.Config().SetColor("#2dd4bf").Render()
 							</p>
 						</div>
 					</section>
