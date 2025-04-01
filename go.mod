@@ -1,11 +1,10 @@
 module github.com/indaco/templheroicons
 
 go 1.23
-
-toolchain go1.23.4
+toolchain go1.24.1
 
 require (
-	github.com/a-h/templ v0.3.833
+	github.com/a-h/templ v0.3.857
 	github.com/tidwall/gjson v1.18.0
 )
 
