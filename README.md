@@ -2,31 +2,27 @@
   templheroicons
 </h1>
 <p align="center">
-    <a href="https://pkg.go.dev/github.com/indaco/templheroicons/" target="_blank">
-        <img src="https://pkg.go.dev/badge/github.com/indaco/templheroicons/.svg" alt="go reference" />
-    </a>
-    &nbsp;
-    <a href="https://goreportcard.com/report/github.com/indaco/templheroicons" target="_blank">
-        <img src="https://goreportcard.com/badge/github.com/indaco/templheroicons" alt="go report card" />
-    </a>
-    &nbsp;
-    <a href="https://coveralls.io/github/indaco/templheroicons?branch=main">
-        <img
-            src="https://coveralls.io/repos/github/indaco/templheroicons/badge.svg?branch=main"
-            alt="Coverage Status"
-        />
-    </a>
-     &nbsp;
-     <a href="https://github.com/indaco/templheroicons/blob/main/LICENSE" target="_blank">
-        <img src="https://img.shields.io/badge/license-mit-blue?style=flat-square&logo=none" alt="license" />
-    </a>
-    &nbsp;
-    <a href="https://www.jetify.com/devbox/docs/contributor-quickstart/">
-      <img
-          src="https://www.jetify.com/img/devbox/shield_moon.svg"
-          alt="Built with Devbox"
-      />
-    </a>
+  <a href="https://github.com/indaco/templheroicons/actions/workflows/ci.yaml" target="_blank">
+    <img src="https://github.com/indaco/templheroicons/actions/workflows/ci.yaml/badge.svg" alt="CI" />
+  </a>
+  <a href="https://codecov.io/gh/indaco/templheroicons">
+    <img src="https://codecov.io/gh/indaco/templheroicons/branch/main/graph/badge.svg" alt="Code coverage" />
+  </a>
+  <a href="https://goreportcard.com/report/github.com/indaco/templheroicons/" target="_blank">
+    <img src="https://goreportcard.com/badge/github.com/indaco/templheroicons" alt="go report card" />
+  </a>
+  <a href="https://badge.fury.io/gh/indaco%2Ftemplheroicons">
+    <img src="https://badge.fury.io/gh/indaco%2Ftemplheroicons.svg" alt="GitHub version" height="18">
+  </a>
+  <a href="https://pkg.go.dev/github.com/indaco/templheroicons/" target="_blank">
+      <img src="https://pkg.go.dev/badge/github.com/indaco/templheroicons/.svg" alt="go reference" />
+  </a>
+   <a href="https://github.com/indaco/templheroicons/blob/main/LICENSE" target="_blank">
+    <img src="https://img.shields.io/badge/license-mit-blue?style=flat-square&logo=none" alt="license" />
+  </a>
+  <a href="https://www.jetify.com/devbox/docs/contributor-quickstart/">
+    <img src="https://www.jetify.com/img/devbox/shield_moon.svg" alt="Built with Devbox" />
+  </a>
 </p>
 
 This package provides the [heroicons](https://heroicons.com) set (_v2.2.0_) as reusable, type-safe go [templ](https://github.com/a-h/templ) components.

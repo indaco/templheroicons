@@ -44,8 +44,8 @@ test: ## Run go tests
 	@go test -race -covermode=atomic .
 
 test/coverage: ## Run go tests and use go tool cover
-	@go test -coverprofile=coverage.out .
-	@go tool cover -html=coverage.out
+	@go test -coverprofile=coverage.txt .
+	@go tool cover -html=coverage.txt
 
 build: ## Generate the Go icon definitions based on parsed data/heroicons_cache.json file.
 	@cd cmd && go run icons-maker.go
